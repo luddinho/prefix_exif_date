@@ -15,7 +15,7 @@ EOF
 }
 
 # read the config file if exists
-CONF="$(dirname "$0")/../cnf/config.cnf"
+CONF="$(dirname "$0")/../config/config.cnf"
 CONF_PHYSICAL=$(readlink -f "$CONF")
 
 if [ -f "$CONF_PHYSICAL" ]; then
