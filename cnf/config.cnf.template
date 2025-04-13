@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Color variables
+red='\033[0;31m'; export red
+green='\033[0;32m'; export green
+yellow='\033[0;33m'; export yellow
+blue='\033[0;34m'; export blue
+magenta='\033[0;35m'; export magenta
+cyan='\033[0;36m'; export cyan
+black='\033[1;30m'; export black
+
+
+# Clear the color after that
+clear='\033[0m'; export clear
+
+
+# Color variables Background
+bg_red='\033[0;41m'; export bg_red
+bg_green='\033[0;42m'; export bg_green
+bg_yellow='\033[0;43m'; export bg_yellow
+bg_blue='\033[0;44m'; export bg_blue
+bg_magenta='\033[0;45m'; export bg_magenta
+bg_cyan='\033[0;46m'; export bg_cyan
+
+
+# RegEx variables for file search
+REGEX_PATTERN=''
+export REGEX_PATTERN
