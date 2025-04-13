@@ -26,3 +26,17 @@ bg_cyan='\033[0;46m'; export bg_cyan
 # RegEx variables for file search
 REGEX_PATTERN=''
 export REGEX_PATTERN
+
+# Tools variables
+EXIF_TOOL="$(which exiftool 2>/dev/null)"
+export EXIF_TOOL
+EXIFTOOL_VERSION=$($EXIF_TOOL -ver 2>/dev/null)
+export EXIFTOOL_VERSION
+EXIFTOOL_VERSION_MAJOR=$(echo $EXIFTOOL_VERSION | cut -d '.' -f 1)
+export EXIFTOOL_VERSION_MAJOR
+EXIFTOOL_VERSION_MINOR=$(echo $EXIFTOOL_VERSION | cut -d '.' -f 2)
+export EXIFTOOL_VERSION_MINOR
+EXIFTOOL_VERSION_PATCH=$(echo $EXIFTOOL_VERSION | cut -d '.' -f 3)
+export EXIFTOOL_VERSION_PATCH
+EXIFTOOL_VERSION_BUILD=$(echo $EXIFTOOL_VERSION | cut -d '.' -f 4)
+export EXIFTOOL_VERSION_BUILD
