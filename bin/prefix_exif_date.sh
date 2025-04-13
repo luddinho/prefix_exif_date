@@ -187,7 +187,7 @@ decission=${decission:-y}
 case $decission in
     [yY] )
         echo
-        echo -e ${green}Start processing files...${clear}\n
+        echo -e "${green}Start processing files...${clear}\n"
         ;;
     [nN] )
         exit 0
@@ -292,7 +292,7 @@ for file in $comand_find; do
                 ;;
               [yY] )
                 echo
-                echo -e ${green}Start processing files...${clear}\n
+                echo -e "${green}Start processing files...${clear}\n"
                 rename
                 ;;
               [nN] ) continue;;
@@ -312,11 +312,11 @@ total_ctr=$((cp_ctr+rn_ctr))
 
 if [ "$total_ctr" != 0 ]; then
     echo
-    echo -e "---------------------------------------------"
-    echo -e "Total amount of processed files:'\t'${total_ctr}"
-    echo -e "Copied files:'\t\t\t\t'${cp_ctr}"
-    echo -e "Renamed files:'\t\t\t\t'${rn_ctr}"
-    echo -e "---------------------------------------------"
+    printf "%-40s\n" "---------------------------------------------------"
+    printf "%-40s %10d\n" "Total amount of processed files:" "$total_ctr"
+    printf "%-40s %10d\n" "Copied files:" "$cp_ctr"
+    printf "%-40s %10d\n" "Renamed files:" "$rn_ctr"
+    printf "%-40s\n" "---------------------------------------------------"
     echo
 else
     echo -e "No file has beeing processed.\n"
