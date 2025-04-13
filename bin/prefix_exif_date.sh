@@ -3,6 +3,17 @@
 # shellcheck disable=SC2154
 # shellcheck disable=SC2086
 
+usage() {
+    cat <<EOF
+    Usage: $0 -s <source_path> -t <target_path>
+    "Options:"
+        -s, --source   Source path to search for files
+        -t, --target   Target path to copy or rename files
+
+        -h, --help     Show this help message
+EOF
+}
+
 # read the config file if exists
 CONF="$(dirname "$0")/../cnf/config.cnf"
 CONF_PHYSICAL=$(readlink -f "$CONF")
@@ -12,43 +23,44 @@ if [ -f "$CONF_PHYSICAL" ]; then
     source "$CONF_PHYSICAL"
 
 # Print Environment Variables
-    echo -e
+    echo
     echo -e "${cyan}---------------     Environment     ---------------${clear}"
     # print directory of the script
     script_dir=$(cd "$(dirname "$0")" && pwd)
     # print out the script directory
-    echo -e Script dir: "$script_dir"
+    printf "%s\t %s\n" "Script dir:" "$script_dir"
 
     # print basename of the script
     script_name=$(basename "$0")
     # print out the script name
-    echo -e Script name: "$script_name"
+    printf "%s\t %s\n" "Script name:" "$script_name"
 
     # print out the current working directory
-    echo -e Working dir: "$(pwd)"
+    printf "%s\t %s\n" "Current dir:" "$(pwd)"
 
     # print out the current shell
-    echo Shell: -e "$SHELL"
-    echo -e
+    printf "%s\t\t %s\n" "Shell:" "$SHELL"
+    echo
 
     # Configuration Variables
     echo -e "${cyan}---------------       Config        ---------------${clear}"
-    echo -e
+    echo
     # print out the config file
-    echo -e Config file: "$CONF_PHYSICAL"
+    printf "%s\t %s\n" "Config file:" "$CONF_PHYSICAL"
 
     # print the exiftool path
-    echo ExifTool: "$EXIF_TOOL"
+    #echo "ExifTool: $EXIF_TOOL"
+    printf "%s\t %s\n" "Exif Path:" "$EXIF_TOOL_PATH"
 
     # print the exiftool version
-    echo ExifTool Version: "$EXIFTOOL_VERSION_MAJOR"."$EXIFTOOL_VERSION_MINOR"."$EXIFTOOL_VERSION_PATCH"
+    printf "%s\t %s\n" "Exif Version:" "${EXIFTOOL_VERSION_MAJOR}.${EXIFTOOL_VERSION_MINOR}"
 
     # print the regex pattern
-    echo Regex Pattern: "$REGEX_PATTERN"
-    echo -e
+    printf "%s\t %s\n" "Regex Pattern:" "$REGEX_PATTERN"
+    echo
 else
     # abort if config file not exists
-    echo -e "Config file not found... Abort!"
+    echo "Config file not found... Abort!"
     exit 1
 fi
 
@@ -79,19 +91,51 @@ function rename () {
     rn_ctr=$((rn_ctr+1))
 }
 
+# Parse the command line arguments
+filename=$(basename "$0")
+PARSED_OPTIONS=$(getopt -n "$filename" -o s:t:h --long source:,target:,help -- "$@")
+retcode=$?
+if [ $retcode != 0 ]; then
+    usage
+fi
 
-# asign arguments to variables
-console=$(echo -e "$0")
-source_path=$(echo -e "$1" | sed -e 's#/$##')
-target_path=$(echo -e "$2" | sed -e 's#/$##')
+# Extract the options and their arguments into variables
+eval set -- "$PARSED_OPTIONS"
 
+# Handle the options and arguments
+while true; do
+    case "$1" in
+        -s|--source)
+            source_path="$2"
+            shift 2
+            ;;
+        -t|--target)
+            target_path="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Invalid option: $1"
+            usage
+            exit 1
+            ;;
+    esac
+done
 
 # check source path and abort if not exists
 if [ -z "$source_path" ]; then
-    echo -e No Source Path given... Abort!
+    echo -e "No Source Path given... Abort!\n"
+    usage
     exit 1
 elif [ ! -d "$source_path" ]; then
-    echo -e Source Path does not exist... Abort!
+    printf "%s\t %s\n" "Source Path:" "$source_path"
+    echo -e "Source Path does not exist... Abort!\n"
     exit 1
 fi
 
@@ -108,23 +152,31 @@ else
         decission=${decission:-y}
 
         case $decission in
-            [yY] ) mkdir -p "$target_path";; 
-            [nN] ) echo -e "User aborted..."; exit 0;;
-            * ) echo -e "Wrong input. Abort..."; exit 1;;
+            [yY] )
+                mkdir -p "$target_path"
+                ;; 
+            [nN] )
+                echo "User aborted..."
+                exit 0
+                ;;
+            * )
+                echo "Wrong input. Abort..."
+                exit 1
+                ;;
         esac
     fi
 fi
 
 # print out the given parameters
-echo -e
+echo
 
 echo -e "${cyan}---------------   Given Parameter   ---------------${clear}"
-echo -e
+echo
 
 echo -e ${bg_yellow}${black}Source Path:${clear} ${yellow}"$source_path"${clear}
 
 echo -e ${bg_green}${black}Target Path:${clear} ${green}"$target_path"${clear}
-echo -e
+echo
 echo -e ${cyan}-----------------------------------------------${cyan}
 
 decission=""
@@ -134,10 +186,8 @@ decission=${decission:-y}
 
 case $decission in
     [yY] )
-        echo -e
-        
-        echo -e ${green}Start processing files...${clear}
-        echo -e
+        echo
+        echo -e ${green}Start processing files...${clear}\n
         ;;
     [nN] )
         exit 0
@@ -207,22 +257,21 @@ for file in $comand_find; do
 
         case $decission in
             [aA] )
-                echo -e
-                echo -e "Your selection: Replace All, do not ask again."
-                echo -e
+                echo
+                echo -e "Your selection: Replace All, do not ask again.\n"
                 copyfile
                 overwrite_all=true
                 ;;
             [yY] )
                 copyfile
-                echo -e
+                echo
                 ;; 
             [nN] )
                 echo -e "Skip file...\n"
                 continue
                 ;;
             [eE] )
-                echo -e "Exit - user aborted!"
+                echo -e "Exit - user aborted!\n"
                 exit 1
                 ;;
             * )
@@ -242,10 +291,8 @@ for file in $comand_find; do
                 rename
                 ;;
               [yY] )
-                echo -e
-                
-                echo -e ${green}Start processing files...${clear}
-                echo -e
+                echo
+                echo -e ${green}Start processing files...${clear}\n
                 rename
                 ;;
               [nN] ) continue;;
@@ -264,16 +311,15 @@ IFS=$OIFS
 total_ctr=$((cp_ctr+rn_ctr))
 
 if [ "$total_ctr" != 0 ]; then
-    echo -e
+    echo
     echo -e "---------------------------------------------"
-    echo -e Total amount of processed files:'\t'"$total_ctr"
-    echo -e -e Copied files:'\t\t\t\t'"$cp_ctr"
-    echo -e -e Renamed files:'\t\t\t\t'"$rn_ctr"
+    echo -e "Total amount of processed files:'\t'${total_ctr}"
+    echo -e "Copied files:'\t\t\t\t'${cp_ctr}"
+    echo -e "Renamed files:'\t\t\t\t'${rn_ctr}"
     echo -e "---------------------------------------------"
-    echo -e
+    echo
 else
-    echo -e No file has beeing processed.
-    echo -e
+    echo -e "No file has beeing processed.\n"
 fi
 
 
@@ -285,16 +331,16 @@ if [ "$total_ctr" != 0 ]; then
 
     case $decission in
         [yY] )
-            echo -e
+            echo
             #find "$target_path" -type f | sort;;
             tree "$target_path"
             ;;
         [nN] )
-            echo -e
+            echo
             exit 0
             ;;
         * )
-            echo -e "Wrong input. Skip..."
+            echo "Wrong input. Skip..."
             exit 1
             ;;
     esac
