@@ -145,7 +145,7 @@ if [ -z "$target_path" ]; then
 else
     if [ ! -d "$target_path" ]; then
         decission=""
-        
+
         echo -e ${bg_red}Target Path does not exists...${clear}
         echo -e -n "Do you want to create ${magenta}\"""$target_path""\"${clear}? ${green}[y]es${clear} / ${yellow}(n)o${clear} "
         read -r decission
@@ -154,7 +154,7 @@ else
         case $decission in
             [yY] )
                 mkdir -p "$target_path"
-                ;; 
+                ;;
             [nN] )
                 echo "User aborted..."
                 exit 0
@@ -205,7 +205,7 @@ IFS=$'\n'
 
 # Detect OS Type and assign specific command to variable.
 case $OSTYPE in
-    'darwin'*) 
+    'darwin'*)
         echo -e ${green}"OS detected: macOS\n"${clear}
         comand_find=$(find "$source_path" -maxdepth 1 -type f \( ! -regex '.*/\..*' \) -regex $REGEX_PATTERN | sort)
         ;;
@@ -252,7 +252,7 @@ for file in $comand_find; do
     else
         decission=""
         echo -e -n "Target File ${magenta}\"""$target_filename""\"${clear} already exists at destination! \nDo you want to overwrite it? ${cyan}[a]ll${clear} / ${green}(y)es${clear} / ${yellow}(n)o${clear} / ${red}(e)xit${clear} "
-        read -r decission  
+        read -r decission
         decission=${decission:-a}
 
         case $decission in
@@ -265,7 +265,7 @@ for file in $comand_find; do
             [yY] )
                 copyfile
                 echo
-                ;; 
+                ;;
             [nN] )
                 echo -e "Skip file...\n"
                 continue
@@ -325,7 +325,7 @@ fi
 
 if [ "$total_ctr" != 0 ]; then
     decission=""
-    echo -e -n "Do you want to list all files at target? ${green}(y)es${clear} / ${yellow}[n]o${clear} " 
+    echo -e -n "Do you want to list all files at target? ${green}(y)es${clear} / ${yellow}[n]o${clear} "
     read -r decission
     decission=${decission:-n}
 
