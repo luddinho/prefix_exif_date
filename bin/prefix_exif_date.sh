@@ -91,42 +91,60 @@ function rename () {
     rn_ctr=$((rn_ctr+1))
 }
 
-# Parse the command line arguments
-filename=$(basename "$0")
-PARSED_OPTIONS=$(getopt -n "$filename" -o s:t:h --long source:,target:,help -- "$@")
-retcode=$?
-if [ $retcode != 0 ]; then
-    usage
-fi
 
-# Extract the options and their arguments into variables
-eval set -- "$PARSED_OPTIONS"
+###############################################
+# Support both short and long options portably #
+###############################################
 
-# Handle the options and arguments
-while true; do
+# Convert long options to short options
+args=()
+while [[ $# -gt 0 ]]; do
     case "$1" in
-        -s|--source)
-            source_path="$2"
-            shift 2
-            ;;
-        -t|--target)
-            target_path="$2"
-            shift 2
-            ;;
-        -h|--help)
-            usage
-            ;;
-        --)
+        --source)
+            args+=("-s")
             shift
-            break
+            args+=("$1")
+            ;;
+        --target)
+            args+=("-t")
+            shift
+            args+=("$1")
+            ;;
+        --help)
+            args+=("-h")
             ;;
         *)
-            echo "Invalid option: $1"
+            args+=("$1")
+            ;;
+    esac
+    shift
+done
+
+# Parse the command line arguments using getopts
+source_path=""
+target_path=""
+while getopts "s:t:h" opt "${args[@]}"; do
+    case $opt in
+        s)
+            source_path="$OPTARG"
+            ;;
+        t)
+            target_path="$OPTARG"
+            ;;
+        h)
+            usage
+            exit 0
+            ;;
+        ?)
             usage
             exit 1
             ;;
     esac
 done
+
+# Debug output for parsed arguments
+echo "[DEBUG] source_path: '$source_path'"
+echo "[DEBUG] target_path: '$target_path'"
 
 # check source path and abort if not exists
 if [ -z "$source_path" ]; then
@@ -203,15 +221,19 @@ rename_all=false
 OIFS=$IFS;
 IFS=$'\n'
 
+# Convert BRE quantifiers (\{4\}) to ERE ({4}) so existing config patterns keep working.
+regex_pattern_ere=$(printf '%s' "$REGEX_PATTERN" | sed -E 's/\\\{([0-9]+)\\\}/{\1}/g')
+echo "[DEBUG] regex_pattern_ere: '$regex_pattern_ere'"
+
 # Detect OS Type and assign specific command to variable.
 case $OSTYPE in
     'darwin'*)
         echo -e ${green}"OS detected: macOS\n"${clear}
-        comand_find=$(find "$source_path" -maxdepth 1 -type f \( ! -regex '.*/\..*' \) -regex $REGEX_PATTERN | sort)
+        comand_find=$(find "$source_path" -maxdepth 1 -type f \( ! -name '.*' \) | grep -E "$regex_pattern_ere" | sort)
         ;;
     'linux'*)
         echo -e ${green}"OS detected: linux\n"${clear}
-        comand_find=$(find "$source_path" -type f -regextype "egrep" -regex $REGEX_PATTERN | sort)
+        comand_find=$(find "$source_path" -maxdepth 1 -type f \( ! -name '.*' \) | grep -E "$regex_pattern_ere" | sort)
         ;;
     *)
         echo -e Abort... No OS detected.
