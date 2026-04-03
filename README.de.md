@@ -115,12 +115,14 @@ export EXIFTOOL_VERSION_MINOR
 
 ## Verwendung
 
+
 ```
-Usage: photo-date-prefix.sh -s <source_path> -t <target_path>
+Usage: photo-date-prefix.sh -s <source_path> -t <target_path> [-c <config_file>]
 
 Optionen:
   -s, --source   Quellverzeichnis, in dem nach Dateien gesucht wird
   -t, --target   Zielverzeichnis, in das Dateien kopiert oder umbenannt werden
+  -c, --config   Pfad zur Konfigurationsdatei (Standard: ../config/config.cnf)
   -h, --help     Diese Hilfe anzeigen
 ```
 
@@ -177,10 +179,19 @@ IMG_1235.jpg
 
 ---
 
+
+### Eigene Konfigurationsdatei angeben
+
+```bash
+./bin/photo-date-prefix.sh -s ~/Temp/raw -t ~/Temp/raw_renamed -c ~/Temp/config/meine-config.cnf
+```
+
+Mit `-c` oder `--config` kann eine eigene Konfigurationsdatei angegeben werden (anstelle der Standarddatei). Das ist nützlich für verschiedene Filtermuster oder ExifTool-Einstellungen.
+
 ### Lange Optionsschreibweise
 
 ```bash
-./bin/photo-date-prefix.sh --source /media/kamera --target /home/user/sortiert
+./bin/photo-date-prefix.sh --source /media/kamera --target /home/user/sortiert --config /pfad/zu/deiner.cnf
 ```
 
 ---

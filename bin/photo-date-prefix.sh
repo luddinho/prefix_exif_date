@@ -5,18 +5,35 @@
 
 usage() {
     cat <<EOF
-    Usage: $0 -s <source_path> -t <target_path>
+    Usage: $0 -s <source_path> -t <target_path> [-c <config_file>]
     "Options:"
         -s, --source   Source path to search for files
         -t, --target   Target path to copy or rename files
-
+        -c, --config   Path to config file (default: ../config/config.cnf)
         -h, --help     Show this help message
 EOF
 }
 
-# read the config file if exists
-CONF="$(dirname "$0")/../config/config.cnf"
-CONF_PHYSICAL=$(readlink -f "$CONF")
+CONFIG_FILE=""
+# Robust pre-parse for -c/--config without shifting global $@
+PRE_ARGS=("$@")
+idx=0
+while [ $idx -lt ${#PRE_ARGS[@]} ]; do
+    arg="${PRE_ARGS[$idx]}"
+    case "$arg" in
+        -c|--config)
+            idx=$((idx+1))
+            CONFIG_FILE="${PRE_ARGS[$idx]}"
+            ;;
+    esac
+    idx=$((idx+1))
+done
+
+# Set default config file if not provided
+if [ -z "$CONFIG_FILE" ]; then
+    CONFIG_FILE="$(dirname "$0")/../config/config.cnf"
+fi
+CONF_PHYSICAL=$(readlink -f "$CONFIG_FILE")
 
 if [ -f "$CONF_PHYSICAL" ]; then
     # shellcheck disable=SC1090
@@ -96,7 +113,8 @@ function rename () {
 # Support both short and long options portably #
 ###############################################
 
-# Convert long options to short options
+
+# Convert long options to short options (including config)
 args=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -110,8 +128,18 @@ while [[ $# -gt 0 ]]; do
             shift
             args+=("$1")
             ;;
+        --config)
+            args+=("-c")
+            shift
+            args+=("$1")
+            ;;
         --help)
             args+=("-h")
+            ;;
+        -c)
+            args+=("-c")
+            shift
+            args+=("$1")
             ;;
         *)
             args+=("$1")
@@ -120,16 +148,20 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+
 # Parse the command line arguments using getopts
 source_path=""
 target_path=""
-while getopts "s:t:h" opt "${args[@]}"; do
+while getopts "s:t:c:h" opt "${args[@]}"; do
     case $opt in
         s)
             source_path="$OPTARG"
             ;;
         t)
             target_path="$OPTARG"
+            ;;
+        c)
+            CONFIG_FILE="$OPTARG"
             ;;
         h)
             usage
@@ -141,6 +173,16 @@ while getopts "s:t:h" opt "${args[@]}"; do
             ;;
     esac
 done
+
+# Re-evaluate CONF_PHYSICAL if -c/--config was provided after initial parse
+CONF_PHYSICAL=$(readlink -f "$CONFIG_FILE")
+if [ -f "$CONF_PHYSICAL" ]; then
+    # shellcheck disable=SC1090
+    source "$CONF_PHYSICAL"
+else
+    echo "Config file not found... Abort!"
+    exit 1
+fi
 
 # Debug output for parsed arguments
 echo "[DEBUG] source_path: '$source_path'"
