@@ -1,4 +1,4 @@
-# prefix_exif_date
+# photo-date-prefix
 
 Language: 🇬🇧 English | [🇩🇪 Deutsch](README.de.md)
 
@@ -68,7 +68,7 @@ sudo apt install libimage-exiftool-perl
 4. Make the script executable:
 
    ```bash
-   chmod +x bin/prefix_exif_date.sh
+   chmod +x bin/photo-date-prefix.sh
    ```
 
 ---
@@ -116,7 +116,7 @@ export EXIFTOOL_VERSION_MINOR
 ## Usage
 
 ```
-Usage: prefix_exif_date.sh -s <source_path> -t <target_path>
+Usage: photo-date-prefix.sh -s <source_path> -t <target_path>
 
 Options:
   -s, --source   Source directory to search for files
@@ -148,7 +148,7 @@ YYYY-MM-DDTHH-MM-SS-<original_filename>.<extension>
 ### Copy files from one directory to another
 
 ```bash
-./bin/prefix_exif_date.sh -s /Volumes/SD-Card/DCIM -t ~/Pictures/Imported
+./bin/photo-date-prefix.sh -s /Volumes/SD-Card/DCIM -t ~/Pictures/Imported
 ```
 
 Files in `/Volumes/SD-Card/DCIM` that match `REGEX_PATTERN` will be **copied** to `~/Pictures/Imported` with a timestamp prefix.
@@ -170,9 +170,9 @@ IMG_1235.jpg
 ### Rename files in-place
 
 ```bash
-./bin/prefix_exif_date.sh -s ~/Pictures/Vacation
+./bin/photo-date-prefix.sh -s ~/Pictures/Vacation
 # or explicitly:
-./bin/prefix_exif_date.sh -s ~/Pictures/Vacation -t ~/Pictures/Vacation
+./bin/photo-date-prefix.sh -s ~/Pictures/Vacation -t ~/Pictures/Vacation
 ```
 
 ---
@@ -180,7 +180,7 @@ IMG_1235.jpg
 ### Long option syntax
 
 ```bash
-./bin/prefix_exif_date.sh --source /media/camera --target /home/user/sorted
+./bin/photo-date-prefix.sh --source /media/camera --target /home/user/sorted
 ```
 
 ---
