@@ -41,7 +41,7 @@ if [ -f "$CONF_PHYSICAL" ]; then
 
 # Print Environment Variables
     echo
-    echo -e "${cyan}---------------     Environment     ---------------${clear}"
+    echo "---------------     Environment     ---------------"
     # print directory of the script
     script_dir=$(cd "$(dirname "$0")" && pwd)
     # print out the script directory
@@ -60,7 +60,7 @@ if [ -f "$CONF_PHYSICAL" ]; then
     echo
 
     # Configuration Variables
-    echo -e "${cyan}---------------       Config        ---------------${clear}"
+    echo "---------------       Config        ---------------"
     echo
     # print out the config file
     printf "%s\t %s\n" "Config file:" "$CONF_PHYSICAL"
@@ -84,28 +84,34 @@ fi
 
 # Check if exiftool is installed
 if [ -z "$EXIF_TOOL" ]; then
-    echo -e "${red}ExifTool is not installed. Please install it first.${clear}"
+    echo "ExifTool is not installed. Please install it first."
     exit 1
 fi
 # Check if exiftool version is 12.00 or higher
 if [ "$EXIFTOOL_VERSION_MAJOR" -lt 12 ]; then
-    echo -e "${red}ExifTool version 12.00 or higher is required. Please update it.${clear}"
+    echo "ExifTool version 12.00 or higher is required. Please update it."
     exit 1
 fi
 
 cp_ctr=0
 rn_ctr=0
+old_names=()
+new_names=()
 
 function copyfile () {
-    echo -e Copy File: ${bg_yellow}${black}"$file"${clear} --\> ${bg_green}${black}"$target_path"/"$target_filename"${clear}
+    echo "Copy File: $file --> $target_path/$target_filename"
     cp -p "$file" "$target_path"/"$target_filename"
     cp_ctr=$((cp_ctr+1))
+    old_names+=("$origin_basename")
+    new_names+=("$target_filename")
 }
 
 function rename () {
-    echo -e Rename File: ${bg_yellow}${black}"$file"${clear} --\> ${bg_green}${black}"$target_path"/"$target_filename"${clear}
+    echo "Rename File: $file --> $target_path/$target_filename"
     mv "$file" "$target_path"/"$target_filename"
     rn_ctr=$((rn_ctr+1))
+    old_names+=("$origin_basename")
+    new_names+=("$target_filename")
 }
 
 
@@ -184,10 +190,6 @@ else
     exit 1
 fi
 
-# Debug output for parsed arguments
-echo "[DEBUG] source_path: '$source_path'"
-echo "[DEBUG] target_path: '$target_path'"
-
 # check source path and abort if not exists
 if [ -z "$source_path" ]; then
     echo -e "No Source Path given... Abort!\n"
@@ -206,8 +208,8 @@ else
     if [ ! -d "$target_path" ]; then
         decission=""
 
-        echo -e ${bg_red}Target Path does not exists...${clear}
-        echo -e -n "Do you want to create ${magenta}\"""$target_path""\"${clear}? ${green}[y]es${clear} / ${yellow}(n)o${clear} "
+        echo "Target Path does not exist..."
+        echo -n "Do you want to create \"$target_path\"? [y]es / (n)o "
         read -r decission
         decission=${decission:-y}
 
@@ -230,24 +232,25 @@ fi
 # print out the given parameters
 echo
 
-echo -e "${cyan}---------------   Given Parameter   ---------------${clear}"
+echo "---------------   Given Parameter   ---------------"
 echo
 
-echo -e ${bg_yellow}${black}Source Path:${clear} ${yellow}"$source_path"${clear}
+echo "Source Path: $source_path"
 
-echo -e ${bg_green}${black}Target Path:${clear} ${green}"$target_path"${clear}
+echo "Target Path: $target_path"
 echo
-echo -e ${cyan}-----------------------------------------------${cyan}
+echo "-----------------------------------------------"
 
 decission=""
-echo -e -n "Do you want to continue? ${green}[y]${clear} / ${yellow}(n)${clear} "
+echo -n "Do you want to continue? [y] / (n) "
 read -r decission
 decission=${decission:-y}
 
 case $decission in
     [yY] )
         echo
-        echo -e "${green}Start processing files...${clear}\n"
+        echo "Start processing files..."
+        echo
         ;;
     [nN] )
         exit 0
@@ -265,16 +268,18 @@ IFS=$'\n'
 
 # Convert BRE quantifiers (\{4\}) to ERE ({4}) so existing config patterns keep working.
 regex_pattern_ere=$(printf '%s' "$REGEX_PATTERN" | sed -E 's/\\\{([0-9]+)\\\}/{\1}/g')
-echo "[DEBUG] regex_pattern_ere: '$regex_pattern_ere'"
+#echo "regex_pattern_ere: '$regex_pattern_ere'"
 
 # Detect OS Type and assign specific command to variable.
 case $OSTYPE in
     'darwin'*)
-        echo -e ${green}"OS detected: macOS\n"${clear}
+        echo "OS detected: macOS"
+        echo
         comand_find=$(find "$source_path" -maxdepth 1 -type f \( ! -name '.*' \) | grep -E "$regex_pattern_ere" | sort)
         ;;
     'linux'*)
-        echo -e ${green}"OS detected: linux\n"${clear}
+        echo "OS detected: linux"
+        echo
         comand_find=$(find "$source_path" -maxdepth 1 -type f \( ! -name '.*' \) | grep -E "$regex_pattern_ere" | sort)
         ;;
     *)
@@ -299,8 +304,9 @@ for file in $comand_find; do
 
     # check if date_time_prefix is empty
     if [ -z "$date_time_prefix" ]; then
-        echo -e "No DateTimeOriginal found in file: ${bg_red}${black}$file${clear}"
-        echo -e "Skip file...\n"
+        echo "No DateTimeOriginal found in file: $file"
+        echo "Skip file..."
+        echo
         continue
     else
         target_filename="$date_time_prefix"-"$origin_filename"."$origin_extension"
@@ -315,14 +321,15 @@ for file in $comand_find; do
         copyfile
     else
         decission=""
-        echo -e -n "Target File ${magenta}\"""$target_filename""\"${clear} already exists at destination! \nDo you want to overwrite it? ${cyan}[a]ll${clear} / ${green}(y)es${clear} / ${yellow}(n)o${clear} / ${red}(e)xit${clear} "
+        echo -n "Target File \"$target_filename\" already exists at destination! Do you want to overwrite it? [a]ll / (y)es / (n)o / (e)xit "
         read -r decission
         decission=${decission:-a}
 
         case $decission in
             [aA] )
                 echo
-                echo -e "Your selection: Replace All, do not ask again.\n"
+                echo "Your selection: Replace All, do not ask again."
+                echo
                 copyfile
                 overwrite_all=true
                 ;;
@@ -331,11 +338,12 @@ for file in $comand_find; do
                 echo
                 ;;
             [nN] )
-                echo -e "Skip file...\n"
+                echo "Skip file..."
+                echo
                 continue
                 ;;
             [eE] )
-                echo -e "Exit - user aborted!\n"
+                echo "Exit - user aborted!"
                 exit 1
                 ;;
             * )
@@ -344,8 +352,8 @@ for file in $comand_find; do
     # in case of equal directory definition (move the file to) just rename it with new filename.
     else
         if [ "$rename_all" != "true" ]; then
-            echo -e "${bg_red}Source and Target is the same.${clear}"
-            echo -e -n "Do you want to rename existing files? ${cyan}(a)ll${clear} / ${green}(y)${clear} / ${yellow}[n]${clear} "
+            echo "Source and Target is the same."
+            echo -n "Do you want to rename existing files? (a)ll / (y) / [n] "
             read -r decission
             decission=${decission:-n}
 
@@ -356,7 +364,8 @@ for file in $comand_find; do
                 ;;
               [yY] )
                 echo
-                echo -e "${green}Start processing files...${clear}\n"
+                                echo "Start processing files..."
+                                echo
                 rename
                 ;;
               [nN] ) continue;;
@@ -383,21 +392,27 @@ if [ "$total_ctr" != 0 ]; then
     printf "%-40s\n" "---------------------------------------------------"
     echo
 else
-    echo -e "No file has beeing processed.\n"
+    echo "No file has been processed."
 fi
 
 
 if [ "$total_ctr" != 0 ]; then
     decission=""
-    echo -e -n "Do you want to list all files at target? ${green}(y)es${clear} / ${yellow}[n]o${clear} "
+    echo -n "Do you want to show old/new filename comparison? (y)es / [n]o "
     read -r decission
     decission=${decission:-n}
 
     case $decission in
         [yY] )
             echo
-            #find "$target_path" -type f | sort;;
-            tree "$target_path"
+            printf "%-50s | %-50s\n" "Old filename" "New filename"
+            printf "%-50s-+-%-50s\n" "--------------------------------------------------" "--------------------------------------------------"
+
+            for i in "${!old_names[@]}"; do
+                printf "%-50s | %-50s\n" "${old_names[$i]}" "${new_names[$i]}"
+            done
+
+            echo
             ;;
         [nN] )
             echo
