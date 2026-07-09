@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # RegEx variables for file search
-REGEX_PATTERN=''
+REGEX_PATTERN='(?i)\.(dng|cr2|cr3|crw|nef|nrw|arw|srf|sr2|raf|orf|rw2|raw|pef|x3f|3fr|mef|mos|erf|fff|gpr|iiq|kdc|srw|bay|ari|cap|dcs|dcr|drf|eip|k25|mdc|obm|ptx|pxn|r3d|rwl|rwz)$'
 export REGEX_PATTERN
 
 # Tools variables
