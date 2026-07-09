@@ -117,12 +117,13 @@ export EXIFTOOL_VERSION_MINOR
 
 
 ```
-Usage: photo-date-prefix.sh -s <source_path> -t <target_path> [-c <config_file>]
+Usage: photo-date-prefix.sh -s <source_path> -t <target_path> [-c <config_file>] [-n]
 
 Options:
   -s, --source   Source directory to search for files
   -t, --target   Target directory to copy or rename files into
   -c, --config   Path to config file (default: ../config/config.cnf)
+  -n, --no-interaction   Run without prompts (auto-apply defaults)
   -h, --help     Show this help message
 ```
 
@@ -134,6 +135,7 @@ Options:
 | `-s` == `-t` | Files are **renamed in-place** |
 | `-s` ≠ `-t` | Original files are **copied** to target with the new prefixed name |
 | Target directory does not exist | Script prompts whether to create it |
+| `-n`, `--no-interaction` enabled | Script runs without prompts and auto-selects defaults |
 | File has no `DateTimeOriginal` tag | File is **skipped** with a warning |
 | Conflict: target file already exists | Interactive prompt: **A**ll / **Y**es / **N**o / **E**xit |
 

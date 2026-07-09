@@ -5,11 +5,12 @@
 
 usage() {
     cat <<EOF
-    Usage: $0 -s <source_path> -t <target_path> [-c <config_file>]
+    Usage: $0 -s <source_path> -t <target_path> [-c <config_file>] [-n]
     "Options:"
         -s, --source   Source path to search for files
         -t, --target   Target path to copy or rename files
         -c, --config   Path to config file (default: ../config/config.cnf)
+        -n, --no-interaction  Run without prompts (auto-apply defaults)
         -h, --help     Show this help message
 EOF
 }
@@ -78,6 +79,8 @@ if [ -f "$CONF_PHYSICAL" ]; then
 else
     # abort if config file not exists
     echo "Config file not found... Abort!"
+    echo
+    usage
     exit 1
 fi
 
@@ -122,6 +125,7 @@ function rename () {
 
 # Convert long options to short options (including config)
 args=()
+NO_INTERACTION=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --source)
@@ -139,8 +143,14 @@ while [[ $# -gt 0 ]]; do
             shift
             args+=("$1")
             ;;
+        --no-interaction)
+            args+=("-n")
+            ;;
         --help)
             args+=("-h")
+            ;;
+        -n)
+            args+=("-n")
             ;;
         -c)
             args+=("-c")
@@ -158,7 +168,7 @@ done
 # Parse the command line arguments using getopts
 source_path=""
 target_path=""
-while getopts "s:t:c:h" opt "${args[@]}"; do
+while getopts "s:t:c:nh" opt "${args[@]}"; do
     case $opt in
         s)
             source_path="$OPTARG"
@@ -168,6 +178,9 @@ while getopts "s:t:c:h" opt "${args[@]}"; do
             ;;
         c)
             CONFIG_FILE="$OPTARG"
+            ;;
+        n)
+            NO_INTERACTION=true
             ;;
         h)
             usage
@@ -209,9 +222,14 @@ else
         decission=""
 
         echo "Target Path does not exist..."
-        echo -n "Do you want to create \"$target_path\"? [y]es / (n)o "
-        read -r decission
-        decission=${decission:-y}
+        if [ "$NO_INTERACTION" = "true" ]; then
+            decission="y"
+            echo "Non-interactive mode: auto-selecting 'yes' to create target path."
+        else
+            echo -n "Do you want to create \"$target_path\"? [y]es / (n)o "
+            read -r decission
+            decission=${decission:-y}
+        fi
 
         case $decission in
             [yY] )
@@ -242,9 +260,14 @@ echo
 echo "-----------------------------------------------"
 
 decission=""
-echo -n "Do you want to continue? [y] / (n) "
-read -r decission
-decission=${decission:-y}
+if [ "$NO_INTERACTION" = "true" ]; then
+    decission="y"
+    echo "Non-interactive mode: auto-selecting 'yes' to continue."
+else
+    echo -n "Do you want to continue? [y] / (n) "
+    read -r decission
+    decission=${decission:-y}
+fi
 
 case $decission in
     [yY] )
@@ -321,9 +344,14 @@ for file in $comand_find; do
         copyfile
     else
         decission=""
-        echo -n "Target File \"$target_filename\" already exists at destination! Do you want to overwrite it? [a]ll / (y)es / (n)o / (e)xit "
-        read -r decission
-        decission=${decission:-a}
+        if [ "$NO_INTERACTION" = "true" ]; then
+            decission="a"
+            echo "Non-interactive mode: auto-selecting 'all' for overwrite conflicts."
+        else
+            echo -n "Target File \"$target_filename\" already exists at destination! Do you want to overwrite it? [a]ll / (y)es / (n)o / (e)xit "
+            read -r decission
+            decission=${decission:-a}
+        fi
 
         case $decission in
             [aA] )
@@ -353,9 +381,14 @@ for file in $comand_find; do
     else
         if [ "$rename_all" != "true" ]; then
             echo "Source and Target is the same."
-            echo -n "Do you want to rename existing files? (a)ll / (y) / [n] "
-            read -r decission
-            decission=${decission:-n}
+            if [ "$NO_INTERACTION" = "true" ]; then
+                decission="a"
+                echo "Non-interactive mode: auto-selecting 'all' to rename files."
+            else
+                echo -n "Do you want to rename existing files? (a)ll / (y) / [n] "
+                read -r decission
+                decission=${decission:-n}
+            fi
 
             case $decission in
               [aA] )
@@ -398,9 +431,14 @@ fi
 
 if [ "$total_ctr" != 0 ]; then
     decission=""
-    echo -n "Do you want to show old/new filename comparison? (y)es / [n]o "
-    read -r decission
-    decission=${decission:-n}
+    if [ "$NO_INTERACTION" = "true" ]; then
+        decission="n"
+        echo "Non-interactive mode: auto-selecting 'no' for filename comparison output."
+    else
+        echo -n "Do you want to show old/new filename comparison? (y)es / [n]o "
+        read -r decission
+        decission=${decission:-n}
+    fi
 
     case $decission in
         [yY] )

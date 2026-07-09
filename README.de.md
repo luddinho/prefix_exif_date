@@ -117,12 +117,13 @@ export EXIFTOOL_VERSION_MINOR
 
 
 ```
-Usage: photo-date-prefix.sh -s <source_path> -t <target_path> [-c <config_file>]
+Usage: photo-date-prefix.sh -s <source_path> -t <target_path> [-c <config_file>] [-n]
 
 Optionen:
   -s, --source   Quellverzeichnis, in dem nach Dateien gesucht wird
   -t, --target   Zielverzeichnis, in das Dateien kopiert oder umbenannt werden
   -c, --config   Pfad zur Konfigurationsdatei (Standard: ../config/config.cnf)
+  -n, --no-interaction   Ohne Rückfragen ausführen (Standardwerte automatisch nutzen)
   -h, --help     Diese Hilfe anzeigen
 ```
 
@@ -134,6 +135,7 @@ Optionen:
 | `-s` == `-t` | Dateien werden **direkt umbenannt** |
 | `-s` ≠ `-t` | Originaldateien werden mit neuem Präfix ins Ziel **kopiert** |
 | Zielverzeichnis existiert nicht | Skript fragt, ob es erstellt werden soll |
+| `-n`, `--no-interaction` aktiviert | Skript läuft ohne Rückfragen und nutzt automatisch Standardwerte |
 | Datei hat keinen `DateTimeOriginal`-Tag | Datei wird mit Hinweis **übersprungen** |
 | Konflikt: Zieldatei existiert bereits | Interaktive Abfrage: **A**lle / **J**a / **N**ein / **B**eenden |
 
