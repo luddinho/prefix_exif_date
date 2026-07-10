@@ -68,7 +68,7 @@ if [ -f "$CONF_PHYSICAL" ]; then
 
     # print the exiftool path
     #echo "ExifTool: $EXIF_TOOL"
-    printf "%s\t %s\n" "Exif Path:" "$EXIF_TOOL_PATH"
+    printf "%s\t %s\n" "Exif binary:" "$EXIF_TOOL"
 
     # print the exiftool version
     printf "%s\t %s\n" "Exif Version:" "${EXIFTOOL_VERSION_MAJOR}.${EXIFTOOL_VERSION_MINOR}"
